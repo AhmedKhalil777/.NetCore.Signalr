@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ChatApp.MVC.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -23,6 +24,10 @@ namespace ChatApp.MVC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options => options.AddPolicy("EnableCors", builder => {
+                builder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
+            }));
+            services.AddSignalR();
             services.AddControllersWithViews();
         }
 
@@ -43,11 +48,12 @@ namespace ChatApp.MVC
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseCors("EnableCors");
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<ChatHub>("/Chathub");
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
